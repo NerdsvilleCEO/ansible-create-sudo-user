@@ -1,0 +1,36 @@
+---
+- name: Install rsync
+  package: name=rsync state=present
+
+- name: Install CentOS specific dependencies
+  package: name=libselinux-python state=present
+  when: ansible_os_family == "CentOS"
+
+- name: Ensure Admin group exists
+  group: name=admin system=yes state=present
+
+- name: Create {{ group }} Group
+  group: name={{ group }} state=present
+
+- name: Create {{ user }} User
+  user: name={{ user }} comment="{{ user }} User" groups={{ group }},admin home={{ home_dir }}/{{ user }}
+
+- name: Add SSH Dir
+  file: path={{ home_dir }}/{{ user }}/.ssh owner={{ user }} group={{ group }} state=directory
+  when: public_key is defined
+
+- name: Upload Chef User Public Key
+  synchronize: src={{ public_key }} dest={{ home_dir }}/{{ user }}/.ssh
+  when: public_key is defined
+  
+- name: Copy sudoers file for safety
+  copy: src=/etc/sudoers dest=/etc/sudoers.tmp remote_src=true
+
+- name: Backup sudoers file
+  copy: src=/etc/sudoers dest=/etc/sudoers.tmp remote_src=true
+
+- name: Make sure we can sudo as admin group
+  lineinfile: dest=/etc/sudoers.tmp state=present regexp='^%admin' line='%admin ALL=(ALL) ALL'
+
+- name: Final sudoers file check
+  shell: visudo -q -c -f /etc/sudoers.tmp && cp -f /etc/sudoers.tmp /etc/sudoers
