@@ -17,14 +17,17 @@
 
 - name: Add SSH Dir
   file: path={{ home_dir }}/{{ user }}/.ssh owner={{ user }} group={{ group }} state=directory
-  when: public_key is defined
+  when: pubkey_file is defined
 
 - name: Upload User Public Key
   synchronize: src={{ key_dir }}/{{ pubkey_file }} dest={{ home_dir }}/{{ user }}/.ssh
-  when: public_key is defined
+  when: pubkey_file is defined
+
+- name: Create authorized_keys file
+  file: path={{ home_dir }}/{{ user }}/.ssh/authorized_keys owner={{ user }} group={{ group }} state=touch
   
 - name: Add SSH key to authorized_keys file
-  shell: touch {{ home_dir }}/{{ user }}/.ssh/authorized_keys && cat {{ home_dir }}/{{ user }}/.ssh/{{ pubkey_file }} >> {{ home_dir }}/{{ user }}/.ssh/authorized_keys
+  shell: cat {{ home_dir }}/{{ user }}/.ssh/{{ pubkey_file }} >> {{ home_dir }}/{{ user }}/.ssh/authorized_keys
   
 - name: Copy sudoers file for safety
   copy: src=/etc/sudoers dest=/etc/sudoers.tmp remote_src=true
