@@ -20,11 +20,11 @@
   when: public_key is defined
 
 - name: Upload User Public Key
-  synchronize: src={{ public_key }} dest={{ home_dir }}/{{ user }}/.ssh
+  synchronize: src={{ key_dir }}/{{ pubkey_file }} dest={{ home_dir }}/{{ user }}/.ssh
   when: public_key is defined
 
 - name: Add SSH key to authorized_keys file
-  shell: cat {{ home_dir }}/{{ user }}/.ssh/{{ public_key }} >> {{ home_dir }}/{{ user }}/.ssh/authorized_keys
+  shell: cat {{ home_dir }}/{{ user }}/.ssh/{{ pubkey_file }} >> {{ home_dir }}/{{ user }}/.ssh/authorized_keys
   
 - name: Copy sudoers file for safety
   copy: src=/etc/sudoers dest=/etc/sudoers.tmp remote_src=true
