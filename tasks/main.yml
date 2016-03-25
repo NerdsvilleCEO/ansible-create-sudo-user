@@ -23,6 +23,9 @@
   synchronize: src={{ key_dir }}/{{ pubkey_file }} dest={{ home_dir }}/{{ user }}/.ssh
   when: public_key is defined
 
+- name: Add authorized_keys file
+  file: path={{ home_dir }}/{{ user }}/.ssh/authorized_keys state=file owner={{ user }} group={{ group }}
+  
 - name: Add SSH key to authorized_keys file
   shell: cat {{ home_dir }}/{{ user }}/.ssh/{{ pubkey_file }} >> {{ home_dir }}/{{ user }}/.ssh/authorized_keys
   
